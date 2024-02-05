@@ -1,4 +1,5 @@
 File: python_environment_check.py
+File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/appendix-A/02_installing-python-libraries/python_environment_check.py
 {
   "Independent Functions": [
     {
@@ -25,6 +26,7 @@ File: python_environment_check.py
 
 --------------------------------------------------
 File: DDP-script.py
+File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/appendix-A/03_main-chapter-code/DDP-script.py
 {
   "Independent Functions": [
     {
@@ -108,6 +110,7 @@ File: DDP-script.py
 
 --------------------------------------------------
 File: bpe_openai_gpt2.py
+File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch02/02_bonus_bytepair-encoder/bpe_openai_gpt2.py
 {
   "Independent Functions": [
     {
@@ -176,6 +179,7 @@ File: bpe_openai_gpt2.py
 
 --------------------------------------------------
 File: previous_chapters.py
+File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch04/01_main-chapter-code/previous_chapters.py
 {
   "Independent Functions": [
     {
