@@ -14,4 +14,4 @@ const get_repo_raw_urls = async (repo_name) => {
     console.log('Data collection complete!');
 }
 
-get_repo_raw_urls("https://github.com/dante-biase/jar2app");
+get_repo_raw_urls("https://github.com/the-amazing-team/sample-repo");

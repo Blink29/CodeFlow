@@ -1,7 +1,7 @@
 import json
+import re
 import requests
 import ast
-import pprint
 import os
 
 def read_urls_from_file(file_path):
@@ -91,6 +91,35 @@ def main():
 
     write_output_to_json(output_data, "output.json")
 
+# if __name__ == "__main__":
+#     main()
 
-if __name__ == "__main__":
-    main()
+REGEX = r'([a-zA-Z0-9\_]+)\s*\([a-zA-Z0-9\_ ,]*\)'
+
+def extract_function_calls(code):
+    # Find all function calls in the code
+    calls = re.findall(REGEX, code)
+
+    # Filter out 'range'
+    function_calls = [call for call in calls if call != 'range']
+
+    return function_calls
+
+def read_code_from_output():
+    with open('output.json', 'r') as f:
+        data = json.load(f)
+
+    for item in data:
+        # Extract the code
+        code = item['code']
+
+        # Extract the function calls
+        called_functions = extract_function_calls(code)
+
+        # If there are any function calls, print them
+        if called_functions:
+            print(f"In the code: \n{code}\nThe following functions are called: {called_functions}\n")
+        else:
+            print(f"In the code: \n{code}\nNo functions are called.\n")
+
+read_code_from_output()
