@@ -1,250 +1,97 @@
-File: python_environment_check.py
-File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/appendix-A/02_installing-python-libraries/python_environment_check.py
+File: jar2app.py
+File Path: https://raw.githubusercontent.com/dante-biase/jar2app/master/jar2app.py
 {
   "Independent Functions": [
     {
-      "name": "get_packages",
+      "name": "main",
       "arguments": [
-        "pkgs"
+        "jar_file",
+        "icon_file",
+        "destination_directory",
+        "name"
       ],
-      "code": "def get_packages(pkgs):\n    versions = []\n    for p in pkgs:\n        try:\n            imported = __import__(p)\n            try:\n                versions.append(imported.__version__)\n            except AttributeError:\n                try:\n                    versions.append(imported.version)\n                except AttributeError:\n                    try:\n                        versions.append(imported.version_info)\n                    except:\n                        try:\n                            import importlib, importlib_metadata\n                            imported = importlib.import_module(p)\n                            version = importlib_metadata.version(p)\n                            versions.append(version)\n                        except ImportError:\n                            version = \"not installed\"\n                            versions.append('0.0')\n        except ImportError:\n            print(f'[FAIL]: {p} is not installed and/or cannot be imported.')\n            versions.append('N/A')\n    return versions"
-    },
-    {
-      "name": "get_requirements_dict",
-      "arguments": [],
-      "code": "def get_requirements_dict():\n    PROJECT_ROOT = dirname(realpath(__file__))\n    REQUIREMENTS_FILE = join(PROJECT_ROOT, \"requirements.txt\")\n    d = {}\n    with open(REQUIREMENTS_FILE) as f:\n        for line in f:\n            line = line.split(\" \")\n            d[line[0]] = line[-1]\n    return d"
-    },
-    {
-      "name": "check_packages",
-      "arguments": [
-        "d"
-      ],
-      "code": "def check_packages(d):\n    versions = get_packages(d.keys())\n\n    for (pkg_name, suggested_ver), actual_ver in zip(d.items(), versions):\n        if actual_ver == 'N/A':\n            continue\n        actual_ver, suggested_ver = version_parse(actual_ver), version_parse(suggested_ver)\n        if actual_ver < suggested_ver:\n            print(f'[FAIL] {pkg_name} {actual_ver}, please upgrade to >= {suggested_ver}')\n        else:\n            print(f'[OK] {pkg_name} {actual_ver}')"
+      "code": "def main(jar_file, icon_file, destination_directory, name):\n\t# ---------------------------------------------- setup app variables -----------------------------------------------\n\tjar_file = Path(jar_file)\n\tjar_file_parent_directory = Path(jar_file.absolute()).parent\n\tapp_name = name if name else jar_file.stem\n\tapp_name = app_name.rstrip(\".app\")+ \".app\"\n\tapp_jar = f\"{app_name}.jar\"\n\tif not destination_directory:\n\t\tapp_target_path = join(jar_file_parent_directory, app_name)\n\telse:\n\t\tapp_target_path = join(destination_directory, app_name)\n\n\t# ------------------------------- create new app in destination folder from template -------------------------------\n\tif exists(app_target_path):\n\t\toverwrite = \"\"\n\t\twhile not (overwrite == 'y' or overwrite == 'n'):\n\t\t\toverwrite = str(input(f\"{app_target_path} already exists. Replace? [y/n]: \")).strip().lower()\n\n\t\tif overwrite == 'y':\n\t\t\trmtree(app_target_path)\n\t\telse:\n\t\t\texit(0)\n\n\tcopytree(Resources.get(\"template.app\"), app_target_path)\n\n\t# -------------------------------------------- copy input files to app ---------------------------------------------\n\tcopy2(jar_file, join(app_target_path, \"Contents/MacOS\", app_jar))\n\tif icon_file:\n\t\tcopy2(icon_file, join(app_target_path, \"Contents/Resources/application.icns\"))\n\n\t# ----------------------------------------- update arguments in app runner -----------------------------------------\n\tapp_runner = join(app_target_path, \"Contents/MacOS/runner\")\n\twith open(app_runner, \"r\") as file:\n\t\tfile_contents = file.read()\n\n\tfile_contents = file_contents \\\n\t\t.replace(\"[APP_JAR]\", app_jar) \\\n\t\t.replace(\"[APP_NAME]\", app_name)\n\t\n\twith open(app_runner, \"br+\") as file:\n\t\tfile.truncate(0)\n\t\tfile.write(bytes(file_contents, \"ascii\"))\n\t# ----------------------------------------------- show app in finder -----------------------------------------------\n\tcall([\"open\", \"-R\", app_target_path])"
     }
   ]
 }
 
 --------------------------------------------------
-File: DDP-script.py
-File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/appendix-A/03_main-chapter-code/DDP-script.py
+File: __init__.py
+File Path: https://raw.githubusercontent.com/dante-biase/jar2app/master/src/__init__.py
 {
-  "Independent Functions": [
-    {
-      "name": "ddp_setup",
-      "arguments": [
-        "rank",
-        "world_size"
-      ],
-      "code": "def ddp_setup(rank, world_size):\n    \"\"\"\n    Arguments:\n        rank: a unique process ID\n        world_size: total number of processes in the group\n    \"\"\"\n    # rank of machine running rank:0 process\n    # here, we assume all GPUs are on the same machine\n    os.environ[\"MASTER_ADDR\"] = \"localhost\"\n    # any free port on the machine\n    os.environ[\"MASTER_PORT\"] = \"12345\"\n\n    # initialize process group\n    # Windows users may have to use \"gloo\" instead of \"nccl\" as backend\n    # nccl: NVIDIA Collective Communication Library\n    init_process_group(backend=\"nccl\", rank=rank, world_size=world_size)\n    torch.cuda.set_device(rank)"
-    },
-    {
-      "name": "prepare_dataset",
-      "arguments": [],
-      "code": "def prepare_dataset():\n    X_train = torch.tensor([\n        [-1.2, 3.1],\n        [-0.9, 2.9],\n        [-0.5, 2.6],\n        [2.3, -1.1],\n        [2.7, -1.5]\n    ])\n    y_train = torch.tensor([0, 0, 0, 1, 1])\n\n    X_test = torch.tensor([\n        [-0.8, 2.8],\n        [2.6, -1.6],\n    ])\n    y_test = torch.tensor([0, 1])\n\n    train_ds = ToyDataset(X_train, y_train)\n    test_ds = ToyDataset(X_test, y_test)\n\n    train_loader = DataLoader(\n        dataset=train_ds,\n        batch_size=2,\n        shuffle=False, # NEW: False because of DistributedSampler below\n        pin_memory=True,\n        drop_last=True,\n        # NEW: chunk batches across GPUs without overlapping samples:\n        sampler=DistributedSampler(train_ds) # NEW\n    )\n    test_loader = DataLoader(\n        dataset=test_ds,\n        batch_size=2,\n        shuffle=False,\n    )\n    return train_loader, test_loader"
-    },
-    {
-      "name": "main",
-      "arguments": [
-        "rank",
-        "world_size",
-        "num_epochs"
-      ],
-      "code": "def main(rank, world_size, num_epochs):\n\n    ddp_setup(rank, world_size) # NEW: initialize process groups\n\n    train_loader, test_loader = prepare_dataset()\n    model = NeuralNetwork(num_inputs=2, num_outputs=2)\n    model.to(rank)\n    optimizer = torch.optim.SGD(model.parameters(), lr=0.5)\n\n    model = DDP(model, device_ids=[rank]) # NEW: wrap model with DDP\n    # the core model is now accessible as model.module\n    \n    for epoch in range(num_epochs):\n    \n        model.train()\n        for features, labels in enumerate(train_loader):\n    \n            features, labels = features.to(rank), labels.to(rank) # New: use rank\n            logits = model(features)\n            loss = F.cross_entropy(logits, labels) # Loss function\n    \n            optimizer.zero_grad()\n            loss.backward()\n            optimizer.step()\n    \n            ### LOGGING\n            print(f\"[GPU{rank}] Epoch: {epoch+1:03d}/{num_epochs:03d}\"\n                  f\" | Batchsize {labels.shape[0]:03d}\"\n                  f\" | Train/Val Loss: {loss:.2f}\")\n    \n    model.eval()\n    train_acc = compute_accuracy(model, train_loader, device=rank)\n    print(f\"[GPU{rank}] Training accuracy\", train_acc)\n    test_acc = compute_accuracy(model, test_loader, device=rank)\n    print(f\"[GPU{rank}] Test accuracy\", test_acc)\n\n    destroy_process_group()"
-    },
-    {
-      "name": "compute_accuracy",
-      "arguments": [
-        "model",
-        "dataloader",
-        "device"
-      ],
-      "code": "def compute_accuracy(model, dataloader, device):\n    model = model.eval()\n    correct = 0.0\n    total_examples = 0\n\n    for idx, (features, labels) in enumerate(dataloader):\n        features, labels = features.to(device), labels.to(device)\n\n        with torch.no_grad():\n            logits = model(features)\n        predictions = torch.argmax(logits, dim=1)\n        compare = labels == predictions\n        correct += torch.sum(compare)\n        total_examples += len(compare)\n    return (correct / total_examples).item()"
-    }
-  ],
-  "ToyDataset": {
-    "__init__": {
-      "name": "__init__",
-      "arguments": [
-        "self",
-        "X",
-        "y"
-      ],
-      "code": "def __init__(self, X, y):\n        self.features = X\n        self.labels = y"
-    },
-    "__getitem__": {
-      "name": "__getitem__",
-      "arguments": [
-        "self",
-        "index"
-      ],
-      "code": "def __getitem__(self, index):\n        one_x = self.features[index]\n        one_y = self.labels[index]\n        return one_x, one_y"
-    },
-    "__len__": {
-      "name": "__len__",
-      "arguments": [
-        "self"
-      ],
-      "code": "def __len__(self):\n        return self.labels.shape[0]"
-    }
-  },
-  "NeuralNetwork": {
-    "__init__": {
-      "name": "__init__",
-      "arguments": [
-        "self",
-        "num_inputs",
-        "num_outputs"
-      ],
-      "code": "def __init__(self, num_inputs, num_outputs):\n        super().__init__()\n\n        self.layers = torch.nn.Sequential(\n            # 1st hidden layer\n            torch.nn.Linear(num_inputs, 30),\n            torch.nn.ReLU(),\n\n            # 2nd hidden layer\n            torch.nn.Linear(30, 20),\n            torch.nn.ReLU(),\n\n            # output layer\n            torch.nn.Linear(20, num_outputs),\n        )"
-    },
-    "forward": {
-      "name": "forward",
-      "arguments": [
-        "self",
-        "x"
-      ],
-      "code": "def forward(self, x):\n        logits = self.layers(x)\n        return logits"
-    }
-  }
+  "Independent Functions": []
 }
 
 --------------------------------------------------
-File: bpe_openai_gpt2.py
-File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch02/02_bonus_bytepair-encoder/bpe_openai_gpt2.py
+File: assertions.py
+File Path: https://raw.githubusercontent.com/dante-biase/jar2app/master/src/assertions.py
 {
   "Independent Functions": [
     {
-      "name": "bytes_to_unicode",
-      "arguments": [],
-      "code": "def bytes_to_unicode():\n    \"\"\"\n    Returns list of utf-8 byte and a corresponding list of unicode strings.\n    The reversible bpe codes work on unicode strings.\n    This means you need a large # of unicode characters in your vocab if you want to avoid UNKs.\n    When you're at something like a 10B token dataset you end up needing around 5K for decent coverage.\n    This is a significant percentage of your normal, say, 32K bpe vocab.\n    To avoid that, we want lookup tables between utf-8 bytes and unicode strings.\n    And avoids mapping to whitespace/control characters the bpe code barfs on.\n    \"\"\"\n    bs = list(range(ord(\"!\"), ord(\"~\")+1))+list(range(ord(\"\u00a1\"), ord(\"\u00ac\")+1))+list(range(ord(\"\u00ae\"), ord(\"\u00ff\")+1))\n    cs = bs[:]\n    n = 0\n    for b in range(2**8):\n        if b not in bs:\n            bs.append(b)\n            cs.append(2**8+n)\n            n += 1\n    cs = [chr(n) for n in cs]\n    return dict(zip(bs, cs))"
-    },
-    {
-      "name": "get_pairs",
+      "name": "assert_existence",
       "arguments": [
-        "word"
+        "path"
       ],
-      "code": "def get_pairs(word):\n    \"\"\"Return set of symbol pairs in a word.\n\n    Word is represented as tuple of symbols (symbols being variable-length strings).\n    \"\"\"\n    pairs = set()\n    prev_char = word[0]\n    for char in word[1:]:\n        pairs.add((prev_char, char))\n        prev_char = char\n    return pairs"
+      "code": "def assert_existence(path):\n\tif not exists(path):\n\t\traise BadParameter(f\"\\\"{path}\\\" does not exist.\")"
     },
     {
-      "name": "get_encoder",
+      "name": "assert_is_file",
       "arguments": [
-        "model_name",
-        "models_dir"
+        "path"
       ],
-      "code": "def get_encoder(model_name, models_dir):\n    with open(os.path.join(models_dir, model_name, 'encoder.json'), 'r') as f:\n        encoder = json.load(f)\n    with open(os.path.join(models_dir, model_name, 'vocab.bpe'), 'r', encoding=\"utf-8\") as f:\n        bpe_data = f.read()\n    bpe_merges = [tuple(merge_str.split()) for merge_str in bpe_data.split('\\n')[1:-1]]\n    return Encoder(\n        encoder=encoder,\n        bpe_merges=bpe_merges,\n    )"
+      "code": "def assert_is_file(path):\n\tassert_existence(path)\n\tif isdir(path):\n\t\traise BadParameter(f\"{path} is a directory.\")"
     },
     {
-      "name": "download_vocab",
-      "arguments": [],
-      "code": "def download_vocab():\n    # Modified code from\n    subdir = 'gpt2_model'\n    if not os.path.exists(subdir):\n        os.makedirs(subdir)\n    subdir = subdir.replace('\\\\','/') # needed for Windows\n\n    for filename in ['encoder.json', 'vocab.bpe']:\n\n        r = requests.get(\"https://openaipublic.blob.core.windows.net/gpt-2/models/117M\" + \"/\" + filename, stream=True)\n\n        with open(os.path.join(subdir, filename), 'wb') as f:\n            file_size = int(r.headers[\"content-length\"])\n            chunk_size = 1000\n            with tqdm(ncols=100, desc=\"Fetching \" + filename, total=file_size, unit_scale=True) as pbar:\n                # 1k for chunk_size, since Ethernet packet size is around 1500 bytes\n                for chunk in r.iter_content(chunk_size=chunk_size):\n                    f.write(chunk)\n                    pbar.update(chunk_size)"
+      "name": "assert_file_type",
+      "arguments": [
+        "file_path",
+        "type_extension"
+      ],
+      "code": "def assert_file_type(file_path, type_extension):\n\tassert_is_file(file_path)\n\tif Path(file_path).suffix != type_extension:\n\t\traise BadParameter(f\"{file_path} is not a {type_extension.lstrip('.')} file.\")"
+    },
+    {
+      "name": "assert_is_dir",
+      "arguments": [
+        "path"
+      ],
+      "code": "def assert_is_dir(path):\n\tassert_existence(path)\n\tif not isdir(path):\n\t\traise BadParameter(f\"{path} is not a directory.\")"
     }
-  ],
-  "Encoder": {
-    "__init__": {
-      "name": "__init__",
-      "arguments": [
-        "self",
-        "encoder",
-        "bpe_merges",
-        "errors"
-      ],
-      "code": "def __init__(self, encoder, bpe_merges, errors='replace'):\n        self.encoder = encoder\n        self.decoder = {v:k for k,v in self.encoder.items()}\n        self.errors = errors # how to handle errors in decoding\n        self.byte_encoder = bytes_to_unicode()\n        self.byte_decoder = {v:k for k, v in self.byte_encoder.items()}\n        self.bpe_ranks = dict(zip(bpe_merges, range(len(bpe_merges))))\n        self.cache = {}\n\n        # Should haved added re.IGNORECASE so BPE merges can happen for capitalized versions of contractions\n        self.pat = re.compile(r\"\"\"'s|'t|'re|'ve|'m|'ll|'d| ?\\p{L}+| ?\\p{N}+| ?[^\\s\\p{L}\\p{N}]+|\\s+(?!\\S)|\\s+\"\"\")"
-    },
-    "bpe": {
-      "name": "bpe",
-      "arguments": [
-        "self",
-        "token"
-      ],
-      "code": "def bpe(self, token):\n        if token in self.cache:\n            return self.cache[token]\n        word = tuple(token)\n        pairs = get_pairs(word)\n\n        if not pairs:\n            return token\n\n        while True:\n            bigram = min(pairs, key = lambda pair: self.bpe_ranks.get(pair, float('inf')))\n            if bigram not in self.bpe_ranks:\n                break\n            first, second = bigram\n            new_word = []\n            i = 0\n            while i < len(word):\n                try:\n                    j = word.index(first, i)\n                    new_word.extend(word[i:j])\n                    i = j\n                except:\n                    new_word.extend(word[i:])\n                    break\n\n                if word[i] == first and i < len(word)-1 and word[i+1] == second:\n                    new_word.append(first+second)\n                    i += 2\n                else:\n                    new_word.append(word[i])\n                    i += 1\n            new_word = tuple(new_word)\n            word = new_word\n            if len(word) == 1:\n                break\n            else:\n                pairs = get_pairs(word)\n        word = ' '.join(word)\n        self.cache[token] = word\n        return word"
-    },
-    "encode": {
-      "name": "encode",
-      "arguments": [
-        "self",
-        "text"
-      ],
-      "code": "def encode(self, text):\n        bpe_tokens = []\n        for token in re.findall(self.pat, text):\n            token = ''.join(self.byte_encoder[b] for b in token.encode('utf-8'))\n            bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(' '))\n        return bpe_tokens"
-    },
-    "decode": {
-      "name": "decode",
-      "arguments": [
-        "self",
-        "tokens"
-      ],
-      "code": "def decode(self, tokens):\n        text = ''.join([self.decoder[token] for token in tokens])\n        text = bytearray([self.byte_decoder[c] for c in text]).decode('utf-8', errors=self.errors)\n        return text"
-    }
-  }
+  ]
 }
 
 --------------------------------------------------
-File: previous_chapters.py
-File Path: https://raw.githubusercontent.com/rasbt/LLMs-from-scratch/main/ch04/01_main-chapter-code/previous_chapters.py
+File: callbacks.py
+File Path: https://raw.githubusercontent.com/dante-biase/jar2app/master/src/callbacks.py
 {
   "Independent Functions": [
     {
-      "name": "create_dataloader",
+      "name": "check_jar_file",
       "arguments": [
-        "txt",
-        "batch_size",
-        "max_length",
-        "stride",
-        "shuffle"
+        "ctx",
+        "param",
+        "file_path"
       ],
-      "code": "def create_dataloader(txt, batch_size=4, max_length=256, stride=128, shuffle=True):\n    # Initialize the tokenizer\n    tokenizer = tiktoken.get_encoding(\"gpt2\")\n\n    # Create dataset\n    dataset = GPTDatasetV1(txt, tokenizer, max_length, stride)\n\n    # Create dataloader\n    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)\n\n    return dataloader"
-    }
-  ],
-  "GPTDatasetV1": {
-    "__init__": {
-      "name": "__init__",
-      "arguments": [
-        "self",
-        "txt",
-        "tokenizer",
-        "max_length",
-        "stride"
-      ],
-      "code": "def __init__(self, txt, tokenizer, max_length, stride):\n        self.tokenizer = tokenizer\n        self.input_ids = []\n        self.target_ids = []\n\n        # Tokenize the entire text\n        token_ids = tokenizer.encode(txt)\n\n        # Use a sliding window to chunk the book into overlapping sequences of max_length\n        for i in range(0, len(token_ids) - max_length, stride):\n            input_chunk = token_ids[i:i + max_length]\n            target_chunk = token_ids[i + 1: i + max_length + 1]\n            self.input_ids.append(torch.tensor(input_chunk))\n            self.target_ids.append(torch.tensor(target_chunk))"
+      "code": "def check_jar_file(ctx, param, file_path):\n\tassert_file_type(file_path, '.jar')\n\treturn Path(file_path).absolute()"
     },
-    "__len__": {
-      "name": "__len__",
+    {
+      "name": "check_icon_file",
       "arguments": [
-        "self"
+        "ctx",
+        "param",
+        "file_path"
       ],
-      "code": "def __len__(self):\n        return len(self.input_ids)"
+      "code": "def check_icon_file(ctx, param, file_path):\n\tif file_path:\n\t\tassert_file_type(file_path, '.icns')\n\t\tfile_path = Path(file_path).absolute()\n\n\treturn file_path"
     },
-    "__getitem__": {
-      "name": "__getitem__",
+    {
+      "name": "check_destination_directory",
       "arguments": [
-        "self",
-        "idx"
+        "ctx",
+        "param",
+        "directory_path"
       ],
-      "code": "def __getitem__(self, idx):\n        return self.input_ids[idx], self.target_ids[idx]"
+      "code": "def check_destination_directory(ctx, param, directory_path):\n\tif directory_path:\n\t\tassert_is_dir(directory_path)\n\t\tdirectory_path = Path(directory_path).absolute()\n\n\treturn directory_path"
     }
-  },
-  "MultiHeadAttention": {
-    "__init__": {
-      "name": "__init__",
-      "arguments": [
-        "self",
-        "d_in",
-        "d_out",
-        "block_size",
-        "dropout",
-        "num_heads",
-        "qkv_bias"
-      ],
-      "code": "def __init__(self, d_in, d_out, block_size, dropout, num_heads, qkv_bias=False):\n        super().__init__()\n        assert d_out % num_heads == 0, \"d_out must be divisible by n_heads\"\n\n        self.d_out = d_out\n        self.num_heads = num_heads\n        self.head_dim = d_out // num_heads # Reduce the projection dim to match desired output dim\n\n        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.out_proj = nn.Linear(d_out, d_out)  # Linear layer to combine head outputs\n        self.dropout = nn.Dropout(dropout)\n        self.register_buffer('mask', torch.triu(torch.ones(block_size, block_size), diagonal=1))"
-    },
-    "forward": {
-      "name": "forward",
-      "arguments": [
-        "self",
-        "x"
-      ],
-      "code": "def forward(self, x):\n        b, num_tokens, d_in = x.shape\n\n        keys = self.W_key(x) # Shape: (b, num_tokens, d_out)\n        queries = self.W_query(x)\n        values = self.W_value(x)\n\n        # We implicitly split the matrix by adding a `num_heads` dimension\n        # Unroll last dim: (b, num_tokens, d_out) -> (b, num_tokens, num_heads, head_dim)\n        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim) \n        values = values.view(b, num_tokens, self.num_heads, self.head_dim)\n        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)\n\n        # Transpose: (b, num_tokens, num_heads, head_dim) -> (b, num_heads, num_tokens, head_dim)\n        keys = keys.transpose(1, 2)\n        queries = queries.transpose(1, 2)\n        values = values.transpose(1, 2)\n\n        # Compute scaled dot-product attention (aka self-attention) with a causal mask\n        attn_scores = queries @ keys.transpose(2, 3)  # Dot product for each head\n        # Original mask truncated to the number of tokens and converted to boolean\n        mask_bool = self.mask.bool()[:num_tokens, :num_tokens]\n        # Unsqueeze the mask twice to match dimensions\n        mask_unsqueezed = mask_bool.unsqueeze(0).unsqueeze(0)\n        # Use the unsqueezed mask to fill attention scores\n        attn_scores.masked_fill_(mask_unsqueezed, -torch.inf)\n        \n        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)\n        attn_weights = self.dropout(attn_weights)\n\n        # Shape: (b, num_tokens, num_heads, head_dim)\n        context_vec = (attn_weights @ values).transpose(1, 2) \n        \n        # Combine heads, where self.d_out = self.num_heads * self.head_dim\n        context_vec = context_vec.contiguous().view(b, num_tokens, self.d_out)\n        context_vec = self.out_proj(context_vec) # optional projection\n\n        return context_vec"
-    }
-  }
+  ]
 }
 
 --------------------------------------------------
