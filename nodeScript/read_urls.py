@@ -4,6 +4,9 @@ import requests
 import ast
 import os
 
+function_id = 1
+REGEX = r'([a-zA-Z0-9\_]+)\s*\([a-zA-Z0-9\_ ,]*\)'
+
 def read_urls_from_file(file_path):
     with open(file_path, "r") as file:
         return json.load(file)
@@ -52,6 +55,7 @@ def parse_class(source_code):
     return class_function_array
 
 def process_url(url):
+    global function_id
     new_file_name = url.split("/")[-1]
     response = requests.get(url)
     with open(new_file_name, "wb") as file:
@@ -59,17 +63,18 @@ def process_url(url):
     with open(new_file_name, "r") as file:
         source_code = file.read()
         parsed_code = parse_class(source_code)
-        # os.remove(new_file_name)
         if parsed_code:
             results = []
             for function_dict in parsed_code:
                 results.append({
+                    "id": function_id,
                     "file_name": new_file_name,
                     "file_path": url,
                     "function_name": function_dict["name"],
                     "arguments": function_dict["arguments"],
                     "code": function_dict["code"]
                 })
+                function_id += 1
             return results
         else:
             return None
@@ -94,13 +99,9 @@ def main():
 # if __name__ == "__main__":
 #     main()
 
-REGEX = r'([a-zA-Z0-9\_]+)\s*\([a-zA-Z0-9\_ ,]*\)'
-
 def extract_function_calls(code):
-    # Find all function calls in the code
     calls = re.findall(REGEX, code)
 
-    # Filter out 'range'
     function_calls = [call for call in calls if call != 'range']
 
     return function_calls
@@ -109,17 +110,19 @@ def read_code_from_output():
     with open('output.json', 'r') as f:
         data = json.load(f)
 
+    function_ids = {item['id']: item['function_name'] for item in data}
+
     for item in data:
-        # Extract the code
         code = item['code']
 
-        # Extract the function calls
         called_functions = extract_function_calls(code)
 
-        # If there are any function calls, print them
-        if called_functions:
-            print(f"In the code: \n{code}\nThe following functions are called: {called_functions}\n")
-        else:
-            print(f"In the code: \n{code}\nNo functions are called.\n")
+        # Exclude the function's own ID from the list of called function IDs
+        called_function_ids = [id for id, func in function_ids.items() if func in called_functions and id != item['id']]
+
+        item['functions_called'] = called_function_ids
+
+    with open('output.json', 'w') as f:
+        json.dump(data, f, indent=2)
 
 read_code_from_output()

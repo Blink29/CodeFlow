@@ -1,1 +1,9 @@
-{"gitignore":["https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/.gitignore"],"py":["https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py","https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/index.py"]}
+{
+  ".gitignore": [
+    "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/.gitignore"
+  ],
+  ".py": [
+    "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
+    "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/index.py"
+  ]
+}
