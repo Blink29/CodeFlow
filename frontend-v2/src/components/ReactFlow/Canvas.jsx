@@ -7,11 +7,12 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
 } from "reactflow";
+import { MarkerType } from "reactflow";
 
-import {
-  nodes as initialNodes,
-  edges as initialEdges,
-} from "./initial-elements";
+// import {
+// nodes as initialNodes,
+// edges as initialEdges,
+// } from "./initial-elements";
 import CustomNode from "./CustomNode";
 
 import "reactflow/dist/style.css";
@@ -29,7 +30,79 @@ const minimapStyle = {
 const onInit = (reactFlowInstance) =>
   console.log("flow loaded:", reactFlowInstance);
 
+const sampleParse = [
+  {
+    id: 1,
+    file_name: "dep.py",
+    file_path:
+      "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
+    function_name: "sum",
+    arguments: ["a", "b"],
+    code: "def sum(a, b):\n    return a + b",
+    functions_called: [],
+  },
+  {
+    id: 2,
+    file_name: "dep.py",
+    file_path:
+      "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
+    function_name: "sub",
+    arguments: ["a", "b"],
+    code: "def sub(a, b):\n    return a - b",
+    functions_called: [],
+  },
+  {
+    id: 3,
+    file_name: "dep.py",
+    file_path:
+      "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
+    function_name: "mul",
+    arguments: ["a", "b"],
+    code: "def mul(a, b):\n    result = 0\n    for _ in range(b):\n        result = sum(result, a)\n    return result",
+    functions_called: [1],
+  },
+  {
+    id: 4,
+    file_name: "dep.py",
+    file_path:
+      "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
+    function_name: "div",
+    arguments: ["a", "b"],
+    code: "def div(a, b):\n    result = 0\n    while a >= b:\n        a = sub(a, b)\n        result = sum(result, 1)\n    return result",
+    functions_called: [1, 2],
+  },
+];
+
 const Canvas = () => {
+  const initialNodes = sampleParse.map((node) => {
+    return {
+      id: node.id.toString(),
+      type: "custom",
+      data: {
+        label: node.function_name,
+        name: node.function_name,
+        code: node.code,
+        description: "[Code Description]",
+      },
+      position: { x: 100, y: 200 },
+    };
+  });
+
+  const initialEdges = [];
+  sampleParse.forEach((node) => {
+    node.functions_called.forEach((called) => {
+      initialEdges.push({
+        id: node.id.toString() + called.toString(),
+        source: node.id.toString(),
+        target: called.toString(),
+        animated: true,
+        markerEnd: {
+          type: MarkerType.ArrowClosed,
+        },
+      });
+    });
+  });
+
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const onConnect = useCallback(
