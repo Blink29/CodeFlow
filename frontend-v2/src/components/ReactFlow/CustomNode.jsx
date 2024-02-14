@@ -3,6 +3,7 @@ import { Handle, Position } from "reactflow";
 
 function CustomNode({ id, data, isConnectable }) {
   const name = data.name;
+  const Id = data.Id;
   const code = data.code;
   const description = data.description;
 
@@ -14,6 +15,7 @@ function CustomNode({ id, data, isConnectable }) {
       </div>
       <div className="custom-node__body">
         <p>{description}</p>
+        <div>{Id}</div>
         <pre>{code}</pre>
       </div>
       <Handle

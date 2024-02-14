@@ -87,6 +87,7 @@ const Canvas = () => {
           data: {
             label: node.function_name,
             name: node.function_name,
+            Id: node.id,
             code: node.code,
             description: "[Code Description]",
           },

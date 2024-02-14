@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 import json
+import os
 
 from main import get_repo_raw_urls
 from read_urls import get_final_output_json
@@ -17,6 +18,7 @@ def get_functions():
     get_final_output_json()
     with open('output.json', 'r') as f:
         data = json.load(f)
+    # os.remove('output.json')
     return jsonify(data)
 
 
