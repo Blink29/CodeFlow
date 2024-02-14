@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "id": 13,
     "file_name": "dep.py",
     "file_path": "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
     "class_name": "under no class",
@@ -13,7 +13,7 @@
     "functions_called": []
   },
   {
-    "id": 2,
+    "id": 14,
     "file_name": "dep.py",
     "file_path": "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
     "class_name": "under no class",
@@ -26,7 +26,7 @@
     "functions_called": []
   },
   {
-    "id": 3,
+    "id": 15,
     "file_name": "dep.py",
     "file_path": "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
     "class_name": "under no class",
@@ -37,11 +37,11 @@
     ],
     "code": "def mul(a, b):\n    result = 0\n    for _ in range(b):\n        result = sum(result, a)\n    return result",
     "functions_called": [
-      1
+      13
     ]
   },
   {
-    "id": 4,
+    "id": 16,
     "file_name": "dep.py",
     "file_path": "https://raw.githubusercontent.com/the-amazing-team/sample-repo/main/dep.py",
     "class_name": "under no class",
@@ -52,8 +52,8 @@
     ],
     "code": "def div(a, b):\n    result = 0\n    while a >= b:\n        a = sub(a, b)\n        result = sum(result, 1)\n    return result",
     "functions_called": [
-      1,
-      2
+      13,
+      14
     ]
   }
 ]

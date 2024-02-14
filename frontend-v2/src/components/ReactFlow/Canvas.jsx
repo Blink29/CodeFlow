@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import ReactFlow, {
   addEdge,
   MiniMap,
@@ -16,6 +16,7 @@ import CustomNode from "./CustomNode";
 
 import "reactflow/dist/style.css";
 import "./overview.css";
+import axios from "../../axios";
 
 const nodeTypes = {
   custom: CustomNode,
@@ -47,6 +48,14 @@ const Canvas = () => {
 
   //   return edge;
   // });
+
+  useEffect(() => {
+    const get_output_json = async () => {
+      const res = await axios.get("/get_functions?url=https://github.com/the-amazing-team/sample-repo");
+      console.log(res.data);
+    }
+    get_output_json();
+  }, [])
 
   return (
     <ReactFlow

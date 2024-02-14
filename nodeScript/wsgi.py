@@ -1,10 +1,12 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 import json
 
 from main import get_repo_raw_urls
 from read_urls import get_final_output_json
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
