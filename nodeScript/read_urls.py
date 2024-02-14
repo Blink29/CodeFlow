@@ -4,7 +4,8 @@ import requests
 import ast
 import os
 
-REGEX = r'([a-zA-Z0-9\_]+)\s*\([a-zA-Z0-9\_ ,]*\)'
+REGEX = r'([a-zA-Z_]\w*)\s*\('
+
 
 def read_urls_from_file(file_path):
     with open(file_path, "r") as file:
@@ -55,8 +56,9 @@ def parse_class(source_code):
 
     return class_function_array
 
+function_id = 1
 def process_url(url):
-    function_id = 1
+    global function_id
     new_file_name = url.split("/")[-1]
     response = requests.get(url)
     with open(new_file_name, "wb") as file:

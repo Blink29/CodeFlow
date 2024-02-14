@@ -79,7 +79,7 @@ const Canvas = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/get_functions?url=https://github.com/the-amazing-team/sample-repo");
+        const res = await axios.get("/get_functions?url=https://github.com/dante-biase/jar2app");
         const parsedData = res.data; 
         const newNodes = parsedData.map((node) => ({
           id: node.id.toString(),
