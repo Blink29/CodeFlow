@@ -19,6 +19,12 @@ import "reactflow/dist/style.css";
 import "./overview.css";
 import axios from "../../axios";
 
+import { useLocation } from "react-router-dom";
+
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 const nodeTypes = {
   custom: CustomNode,
 };
@@ -73,14 +79,17 @@ const onInit = (reactFlowInstance) =>
 //   },
 // ];
 const Canvas = () => {
+  const query = useQuery();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const url = query.get("url");
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("/get_functions?url=https://github.com/dante-biase/jar2app");
-        const parsedData = res.data; 
+        const res = await axios.get(`/get_functions?url=${url}`);
+        const parsedData = res.data;
         const newNodes = parsedData.map((node) => ({
           id: node.id.toString(),
           type: "custom",
@@ -134,7 +143,6 @@ const Canvas = () => {
 
   //   return edge;
   // });
-
 
   return (
     <ReactFlow

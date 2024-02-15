@@ -1,6 +1,6 @@
 [
   {
-    "id": 33,
+    "id": 41,
     "file_name": "jar2app.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/jar2app.py",
     "class_name": "under no class",
@@ -15,7 +15,7 @@
     "functions_called": []
   },
   {
-    "id": 34,
+    "id": 42,
     "file_name": "assertions.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/assertions.py",
     "class_name": "under no class",
@@ -27,7 +27,7 @@
     "functions_called": []
   },
   {
-    "id": 35,
+    "id": 43,
     "file_name": "assertions.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/assertions.py",
     "class_name": "under no class",
@@ -37,11 +37,11 @@
     ],
     "code": "def assert_is_file(path):\n\tassert_existence(path)\n\tif isdir(path):\n\t\traise BadParameter(f\"{path} is a directory.\")",
     "functions_called": [
-      34
+      42
     ]
   },
   {
-    "id": 36,
+    "id": 44,
     "file_name": "assertions.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/assertions.py",
     "class_name": "under no class",
@@ -52,11 +52,11 @@
     ],
     "code": "def assert_file_type(file_path, type_extension):\n\tassert_is_file(file_path)\n\tif Path(file_path).suffix != type_extension:\n\t\traise BadParameter(f\"{file_path} is not a {type_extension.lstrip('.')} file.\")",
     "functions_called": [
-      35
+      43
     ]
   },
   {
-    "id": 37,
+    "id": 45,
     "file_name": "assertions.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/assertions.py",
     "class_name": "under no class",
@@ -66,11 +66,11 @@
     ],
     "code": "def assert_is_dir(path):\n\tassert_existence(path)\n\tif not isdir(path):\n\t\traise BadParameter(f\"{path} is not a directory.\")",
     "functions_called": [
-      34
+      42
     ]
   },
   {
-    "id": 38,
+    "id": 46,
     "file_name": "callbacks.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/callbacks.py",
     "class_name": "under no class",
@@ -82,11 +82,11 @@
     ],
     "code": "def check_jar_file(ctx, param, file_path):\n\tassert_file_type(file_path, '.jar')\n\treturn Path(file_path).absolute()",
     "functions_called": [
-      36
+      44
     ]
   },
   {
-    "id": 39,
+    "id": 47,
     "file_name": "callbacks.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/callbacks.py",
     "class_name": "under no class",
@@ -98,11 +98,11 @@
     ],
     "code": "def check_icon_file(ctx, param, file_path):\n\tif file_path:\n\t\tassert_file_type(file_path, '.icns')\n\t\tfile_path = Path(file_path).absolute()\n\n\treturn file_path",
     "functions_called": [
-      36
+      44
     ]
   },
   {
-    "id": 40,
+    "id": 48,
     "file_name": "callbacks.py",
     "file_path": "https://raw.githubusercontent.com/dante-biase/jar2app/master/src/callbacks.py",
     "class_name": "under no class",
@@ -114,7 +114,7 @@
     ],
     "code": "def check_destination_directory(ctx, param, directory_path):\n\tif directory_path:\n\t\tassert_is_dir(directory_path)\n\t\tdirectory_path = Path(directory_path).absolute()\n\n\treturn directory_path",
     "functions_called": [
-      37
+      45
     ]
   }
 ]
