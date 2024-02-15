@@ -1,20 +1,26 @@
-from services.parser import get_imported_classes
-from services.github_wrapper import get_package_classes, github
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import json
+import os
 
-code = """
+from main import get_repo_raw_urls
+from read_urls import get_final_output_json
 
-from .webscapy import Webscapyasdkfljasdg
-from .webscapy import Webscapyasdkfljasdgasdf
-from .webscapy import Webscapyasdkfljasdgasdasdff
-from .webscapy import Webscapyasdkfljasdgasd
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/get_functions', methods=['GET'])
+def get_functions():
+    url = request.args.get('url')
+    get_repo_raw_urls(url)
+    if not url:
+        return jsonify({"error": "URL not provided."})
+    get_final_output_json()
+    with open('output.json', 'r') as f:
+        data = json.load(f)
+    # os.remove('output.json')
+    return jsonify(data)
 
 
-asdlfkasdg
-asdfjasdg
-
-
-"""
-
-
-classes = get_package_classes("dusklight00/webscapy", packages=["webscapy"])
-print(classes)
+if __name__ == '__main__':
+    app.run(debug=True)
