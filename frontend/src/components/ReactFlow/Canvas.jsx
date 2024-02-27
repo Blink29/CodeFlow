@@ -315,13 +315,15 @@ const Canvas = () => {
           node["X_coordinate"] = xCoordinate;
           node["Y_coordinate"] = yCoordinate;
         });
-        
+
         const newNodes = parsedData.map((node) => ({
           id: node.id.toString(),
           type: "custom",
           data: {
             label: node.function_name,
             name: node.function_name,
+            file_name: node.file_name,
+            file_path: node.file_path,
             Id: node.id,
             code: node.code,
             description: "[Code Description]",
