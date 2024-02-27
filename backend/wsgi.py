@@ -11,10 +11,10 @@ CORS(app)
 
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
-    url = request.args.get('url')
-    get_repo_raw_urls(url)
-    if not url:
-        return jsonify({"error": "URL not provided."})
+    # url = request.args.get('url')
+    get_repo_raw_urls("https://github.com/allrod5/pycollect")
+    # if not url:
+    #     return jsonify({"error": "URL not provided."})
     get_final_output_json()
     with open('output.json', 'r') as f:
         data = json.load(f)

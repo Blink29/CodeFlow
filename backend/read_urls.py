@@ -4,8 +4,9 @@ import requests
 import ast
 import os
 
-REGEX = r'([a-zA-Z_]\w*)\s*\('
+from rating import calculate_function_ratings
 
+REGEX = r'([a-zA-Z_]\w*)\s*\('
 
 def read_urls_from_file(file_path):
     with open(file_path, "r") as file:
@@ -121,6 +122,7 @@ def get_final_output_json():
 
     write_output_to_json(output_data, "output.json")
     read_code_from_output()
+
 
 
 
