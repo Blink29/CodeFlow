@@ -16,7 +16,7 @@ function CustomNode({ id, data, isConnectable }) {
       <div className="custom-node__body">
         <p>{description}</p>
         {/* <div>{Id}</div> */}
-        <pre>{code}</pre>
+        {/* <pre>{code}</pre> */}
       </div>
       <Handle
         type="source"
