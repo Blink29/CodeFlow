@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
 
 function CustomNode({ id, data, isConnectable }) {
+  const name = data.name;
+  const Id = data.Id;
+  const code = data.code;
+  const file_name = data.file_name;
+  const file_path = data.file_path;
+  const description = data.description;
+  const class_name = data.class_name;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
   const modalRef = useRef(null);
@@ -14,10 +21,8 @@ function CustomNode({ id, data, isConnectable }) {
         setIsModalOpen(false);
       }
     }
-    // Bind the event listener
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      // Unbind the event listener on cleanup
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
@@ -27,13 +32,6 @@ function CustomNode({ id, data, isConnectable }) {
     setSelectedNode(nodeData);
   };
 
-  const name = data.name;
-  const Id = data.Id;
-  const code = data.code;
-  const file_name = data.file_name;
-  const file_path = data.file_path;
-  const description = data.description;
-
   return (
     <>
       <Handle type="target" position={Position.Left} />
@@ -42,6 +40,7 @@ function CustomNode({ id, data, isConnectable }) {
         onClick={() => toggleModal(data)}
       >
         <strong>{name}</strong>
+        <p className="text-gray-500">{class_name}</p>
         <p className="text-gray-500">{file_name}</p>
       </div>
       <AnimatePresence>

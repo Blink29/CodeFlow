@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ReactFlow, {
   addEdge,
   MiniMap,
@@ -250,29 +250,11 @@ const parsedData = [
   },
 ];
 
-// function groupByFunctionRating(arr) {
-//   const occurrenceMap = {};
-//     for (let num of arr) {
-//         if (occurrenceMap[num]) {
-//             occurrenceMap[num].push(num);
-//         } else {
-//             occurrenceMap[num] = [num];
-//         }
-//     }
-
-//     const groupedOccurrences = Object.values(occurrenceMap);
-//     return groupedOccurrences;
-// }
-
-// function getFunctionRatingArray() {
-//   const ranking_list = (parsedData.map(data => data.function_rating))
-//   const result = groupByFunctionRating(ranking_list)
-//   return result
-// }
 const Canvas = () => {
   // const query = useQuery();
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   // const url = query.get("url");
 
@@ -283,17 +265,17 @@ const Canvas = () => {
         // const parsedData = res.data;
         const sortedData = parsedData
           .slice()
-          .sort((a, b) => b.function_rating - a.function_rating); 
+          .sort((a, b) => b.function_rating - a.function_rating);
 
-        const ratingMap = new Map(); 
-        const yCoordinatesMap = new Map(); 
-        let currentX = 400; 
+        const ratingMap = new Map();
+        const yCoordinatesMap = new Map();
+        let currentX = 400;
 
         sortedData.forEach((node) => {
           if (!ratingMap.has(node.function_rating)) {
             ratingMap.set(node.function_rating, currentX);
-            yCoordinatesMap.set(currentX, new Set()); 
-            currentX -= 250; 
+            yCoordinatesMap.set(currentX, new Set());
+            currentX -= 250;
           }
 
           const xCoordinate = ratingMap.get(node.function_rating);
@@ -326,6 +308,7 @@ const Canvas = () => {
             file_path: node.file_path,
             Id: node.id,
             code: node.code,
+            class_name: node.class_name,
             description: "[Code Description]",
           },
           position: { x: node.X_coordinate, y: node.Y_coordinate },
@@ -356,6 +339,23 @@ const Canvas = () => {
     fetchData();
   }, []);
 
+  const onNodeClick = (event, node) => {
+    const nodeId = node.id;
+    console.log(nodeId);
+    const updatedEdges = edges.map((edge) => {
+      if (edge.source === nodeId || edge.target === nodeId) {
+        return {
+          ...edge,
+          style: {
+            strokeWidth: 2,
+            stroke: "#FF0072",
+          },
+        };
+      }
+      return edge;
+    });
+    setEdges(updatedEdges);
+  };
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     []
@@ -371,6 +371,8 @@ const Canvas = () => {
       onInit={onInit}
       fitView
       attributionPosition="top-right"
+      onNodeClick={onNodeClick}
+      elements={{ nodes, edges }}
       nodeTypes={nodeTypes}
     >
       <MiniMap style={minimapStyle} zoomable pannable />
