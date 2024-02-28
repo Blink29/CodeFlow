@@ -350,12 +350,17 @@ const Canvas = () => {
             strokeWidth: 2,
             stroke: "#FF0072",
           },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#FF0072",
+          },
         };
       }
       return edge;
     });
     setEdges(updatedEdges);
   };
+
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     []
@@ -372,7 +377,7 @@ const Canvas = () => {
       fitView
       attributionPosition="top-right"
       onNodeClick={onNodeClick}
-      elements={{ nodes, edges }}
+
       nodeTypes={nodeTypes}
     >
       <MiniMap style={minimapStyle} zoomable pannable />
