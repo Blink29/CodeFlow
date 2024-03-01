@@ -110,7 +110,7 @@ def read_code_from_output():
         json.dump(data, f, indent=2)
 
 def get_final_output_json():
-    urls_data = read_urls_from_file("urls.json")
+    urls_data = read_urls_from_file("urls1.json")
     raw_urls = get_py_raw_urls(urls_data)
 
     output_data = []
@@ -122,6 +122,22 @@ def get_final_output_json():
 
     write_output_to_json(output_data, "output.json")
     read_code_from_output()
+
+    with open('output.json', 'r') as f:
+        data = json.load(f)
+
+    function_ratings = calculate_function_ratings(data)
+
+    for entry in data:
+        function_id = entry["id"]
+        entry["function_rating"] = function_ratings.get(function_id, 0)
+
+    def write_output_to_json(output_data, output_file):
+        with open(output_file, "w") as file:
+            json.dump(output_data, file, indent=2)
+
+    write_output_to_json(data, "output1.json")
+
 
 
 

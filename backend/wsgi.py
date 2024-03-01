@@ -3,22 +3,20 @@ from flask_cors import CORS
 import json
 import os
 
-from main import get_repo_raw_urls
-from read_urls import get_final_output_json
+from main import get_repo_data
 
 app = Flask(__name__)
 CORS(app)
 
 @app.route('/get_functions', methods=['GET'])
 def get_functions():
-    # url = request.args.get('url')
-    get_repo_raw_urls("https://github.com/allrod5/pycollect")
-    # if not url:
-    #     return jsonify({"error": "URL not provided."})
-    get_final_output_json()
-    with open('output.json', 'r') as f:
+    url = request.args.get('url')
+    if not url:
+        return jsonify({"error": "URL not provided."})
+    local_path = "/Users/paurushkumar/Desktop/CodeFlow/empty" 
+    get_repo_data(url, local_path)
+    with open('parsed_data.json', 'r') as f:
         data = json.load(f)
-    # os.remove('output.json')
     return jsonify(data)
 
 
