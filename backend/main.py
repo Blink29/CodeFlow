@@ -86,6 +86,7 @@ def remove_cloned_dir(local_path):
     shutil.rmtree(local_path)
 
 def get_repo_data(repo_url, local_path):
+    function_id = 1
     clone_repo(repo_url, local_path)
     data = process_local_files(local_path)
     with open('parsed_data.json', 'w') as f:

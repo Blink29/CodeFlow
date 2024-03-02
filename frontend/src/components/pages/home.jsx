@@ -3,18 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [url, setUrl] = useState("");
-  // const history = useHistory();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
     navigate(`/canvas?url=${url}`);
   };
-
-  // const handleSubmit = (e) => {
-  //   e.preventDefault;
-  //   history.push(`/canvas?url=${url}`);
-  // };
 
   return (
     <div className="h-full flex border border-1 border-red-700 items-center justify-center">
