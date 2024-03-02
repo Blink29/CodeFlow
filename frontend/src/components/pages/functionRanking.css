@@ -1,0 +1,11 @@
+div {
+    margin-bottom: 16px;
+}
+
+table, td, th {
+  border: 1px solid black;
+  text-align: center;
+  border-collapse: collapse;
+  padding: 10px;
+  margin: 0 auto;
+}
