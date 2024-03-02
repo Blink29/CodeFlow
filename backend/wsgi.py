@@ -17,7 +17,7 @@ def get_functions():
     get_repo_data(url, local_path)
     with open('parsed_data.json', 'r') as f:
         data = json.load(f)
-    # os.remove('parsed_data.json')
+    os.remove('parsed_data.json')
     # get_repo_raw_urls("https://github.com/allrod5/pycollect")
     return jsonify(data)
 

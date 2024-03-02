@@ -17,8 +17,6 @@ function CustomNode({ id, data, isConnectable }) {
   // const description = data.description;
   const class_name = data.class_name;
 
-  const nameID = Id.toString();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef(null);
 
@@ -73,15 +71,13 @@ function CustomNode({ id, data, isConnectable }) {
                   style={{ fontSize: "24px" }}
                 />
                 <div className="mt-4">
+
                   <p className="text-lg font-semibold">{name}</p>
                   <p className="text-gray-500">{file_path}</p>
-                  {/* <pre className="mt-4 p-2 bg-gray-100 rounded-md overflow-auto">
-                    {code}
-                  </pre> */}
                   <AceEditor
                     mode="python"
                     theme="monokai"
-                    name={nameID}
+                    name={Id.toString()}
                     editorProps={{ $blockScrolling: true }}
                     fontSize={14}
                     showPrintMargin={true}
@@ -110,6 +106,7 @@ function CustomNode({ id, data, isConnectable }) {
         style={{ right: "-4px" }}
       />
     </>
+    
   );
 }
 

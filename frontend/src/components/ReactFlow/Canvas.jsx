@@ -15,7 +15,7 @@ import "reactflow/dist/style.css";
 import "./overview.css";
 import axios from "../../axios";
 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
@@ -37,15 +37,18 @@ const Canvas = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [functionsData, setFunctionsData] = useState([]);
   const [openModal, setOpenModal] = useState(false);
 
   const url = query.get("url");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await axios.get(`/get_functions?url=${url}`);
         const parsedData = res.data;
+        setFunctionsData(parsedData);
         const sortedData = parsedData
           .slice()
           .sort((a, b) => b.function_rating - a.function_rating);
@@ -125,7 +128,7 @@ const Canvas = () => {
   }, []);
 
   useEffect(() => {
-    if(selectedNode) {
+    if (selectedNode) {
       const resetEdges = edges.map((edge) => {
         return {
           ...edge,
@@ -134,7 +137,7 @@ const Canvas = () => {
             type: MarkerType.ArrowClosed,
           },
         };
-      })
+      });
       const updatedEdges = resetEdges.map((edge) => {
         if (edge.source === selectedNode || edge.target === selectedNode) {
           return {
@@ -153,35 +156,46 @@ const Canvas = () => {
       });
       setEdges(updatedEdges);
     }
-  }, [selectedNode])
+  }, [selectedNode]);
 
   const onNodeClick = (event, node) => {
     setSelectedNode(node.id);
     setOpenModal(node.id);
   };
-  
+
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     []
   );
 
+  const showFunctionRanking = () => {
+    navigate("/function-rankings", { state: functionsData});
+  };
+
   return (
-    <ReactFlow
-      nodes={nodes}
-      edges={edges}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onInit={onInit}
-      fitView
-      attributionPosition="top-right"
-      onNodeClick={onNodeClick}
-      nodeTypes={nodeTypes}
-    >
-      <MiniMap style={minimapStyle} zoomable pannable />
-      <Controls />
-      <Background color="#aaa" gap={16} />
-    </ReactFlow>
+    <>
+      <div className="w-full flex justify-center">
+        <button onClick={showFunctionRanking} className="text-green-600">
+          Show Function Rankings
+        </button>
+      </div>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onInit={onInit}
+        fitView
+        attributionPosition="top-right"
+        onNodeClick={onNodeClick}
+        nodeTypes={nodeTypes}
+      >
+        <MiniMap style={minimapStyle} zoomable pannable />
+        <Controls />
+        <Background color="#aaa" gap={16} />
+      </ReactFlow>
+    </>
   );
 };
 

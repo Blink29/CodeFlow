@@ -5,6 +5,7 @@ import "./styles.css";
 
 import Canvas from "./components/ReactFlow/Canvas";
 import Home from "./components/pages/home";
+import FunctionRanking from "./components/pages/functionRanking";
 
 const root = createRoot(document.getElementById("root"));
 root.render(
@@ -13,6 +14,7 @@ root.render(
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/canvas" element={<Canvas />} />
+        <Route path="/function-rankings" element={<FunctionRanking />} />
       </Routes>
     </BrowserRouter>
     {/* <Canvas /> */}

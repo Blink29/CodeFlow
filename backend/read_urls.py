@@ -15,47 +15,83 @@ def read_urls_from_file(file_path):
 def get_py_raw_urls(urls_data):
     return urls_data.get('.py', [])
 
+# def parse_class(source_code):
+#     tree = ast.parse(source_code)
+#     class_function_dict = {}
+#     class_function_array = []
+#     current_class = None
+#     imports = []
+
+#     for node in ast.iter_child_nodes(tree):
+#         # if isinstance(node, ast.Import):
+#         #     for alias in node.names:
+#         #         imports.append(alias.name)
+#         # elif isinstance(node, ast.ImportFrom):
+#         #     for alias in node.names:
+#         #         imports.append(f"{node.module}.{alias.name}")
+#         if isinstance(node, ast.ClassDef):
+#             current_class = node.name
+#             class_function_dict[current_class] = {}
+#             for subnode in ast.iter_child_nodes(node):
+#                 if isinstance(subnode, ast.FunctionDef):
+#                     function_name = subnode.name
+#                     arguments = [arg.arg for arg in subnode.args.args]
+#                     code = ast.get_source_segment(source_code, subnode)
+#                     class_function_dict = {
+#                         "class_name": current_class,
+#                         "name": function_name,
+#                         "arguments": arguments,
+#                         "code": code,
+#                     }
+#         elif isinstance(node, ast.FunctionDef):
+#             function_name = node.name
+#             arguments = [arg.arg for arg in node.args.args]
+#             code = ast.get_source_segment(source_code, node)
+#             class_function_dict = {
+#                 "class_name": "under no class",
+#                 "name": function_name,
+#                 "arguments": arguments,
+#                 "code": code,
+#             }
+#             class_function_array.append(class_function_dict)
+
+#     return class_function_array
+
+import ast
+
 def parse_class(source_code):
     tree = ast.parse(source_code)
-    class_function_dict = {}
-    class_function_array = []
-    current_class = None
-    imports = []
+    function_definitions = []
 
-    for node in ast.iter_child_nodes(tree):
-        # if isinstance(node, ast.Import):
-        #     for alias in node.names:
-        #         imports.append(alias.name)
-        # elif isinstance(node, ast.ImportFrom):
-        #     for alias in node.names:
-        #         imports.append(f"{node.module}.{alias.name}")
-        if isinstance(node, ast.ClassDef):
-            current_class = node.name
-            class_function_dict[current_class] = {}
-            for subnode in ast.iter_child_nodes(node):
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef):
+            function_name = node.name
+            arguments = [arg.arg for arg in node.args.args]
+            code = ast.get_source_segment(source_code, node)
+            function_info = {
+                "name": function_name,
+                "class_name": "under no class",
+                "arguments": arguments,
+                "code": code
+            }
+            function_definitions.append(function_info)
+        elif isinstance(node, ast.ClassDef):
+            class_name = node.name
+            for subnode in node.body:
                 if isinstance(subnode, ast.FunctionDef):
                     function_name = subnode.name
                     arguments = [arg.arg for arg in subnode.args.args]
                     code = ast.get_source_segment(source_code, subnode)
-                    class_function_dict = {
-                        "class_name": current_class,
+                    function_info = {
+                        "class_name": class_name,
                         "name": function_name,
                         "arguments": arguments,
-                        "code": code,
+                        "code": code
                     }
-        elif isinstance(node, ast.FunctionDef):
-            function_name = node.name
-            arguments = [arg.arg for arg in node.args.args]
-            code = ast.get_source_segment(source_code, node)
-            class_function_dict = {
-                "class_name": "under no class",
-                "name": function_name,
-                "arguments": arguments,
-                "code": code,
-            }
-            class_function_array.append(class_function_dict)
+                    function_definitions.append(function_info)
 
-    return class_function_array
+    return function_definitions
+
 
 function_id = 1
 def process_url(url):

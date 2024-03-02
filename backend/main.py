@@ -9,22 +9,29 @@ REGEX = r'([a-zA-Z_]\w*)\s*\('
 function_id = 1
 
 def clone_repo(repo_url, local_path):
-    os.system(f"git clone {repo_url} {local_path}")
+    result = os.system(f"git clone {repo_url} {local_path}")
+    # print(f"Git clone result: {result}")
 
-def process_local_files(local_path):
+def process_local_files(local_path, repo_url):
     results = []
     global function_id
     
     for root, dirs, files in os.walk(local_path):
+        # print(f"Current directory: {root}")
+        # print(f"Directories: {dirs}")
+        # print(f"Files: {files}")
         for file_name in files:
             if file_name.endswith('.py'):  
                 file_path = os.path.join(root, file_name)
+                print(file_path)
                 with open(file_path, "r") as file:
                     source_code = file.read()
+                    print(f'source_code: {source_code}')
                     parsed_code = parse_class(source_code)
+                    print(parsed_code)
                 if parsed_code:
                     common_suffix = os.path.commonpath([local_path, file_path])
-                    repo_url = "https://github.com/allrod5/pycollect"
+                    # repo_url = "https://github.com/allrod5/pycollect"
                     relative_path = os.path.relpath(file_path, common_suffix)
                     file_path = f"{repo_url.rstrip('/')}/raw/master/{relative_path.replace(os.sep, '/')}"
                     
@@ -33,12 +40,12 @@ def process_local_files(local_path):
                             "id": function_id,
                             "file_name": file_name,
                             "file_path": file_path,
-                            "class_name": function_dict["class_name"],
+                            "class_name": function_dict.get("class_name", "under no class"),
                             "function_name": function_dict["name"],
                             "arguments": function_dict["arguments"],
                             "code": function_dict["code"]
                         })
-                        function_id += 1
+                        function_id += 1         
 
     return results
 
@@ -88,21 +95,22 @@ def remove_cloned_dir(local_path):
 def get_repo_data(repo_url, local_path):
     function_id = 1
     clone_repo(repo_url, local_path)
-    data = process_local_files(local_path)
+    data = process_local_files(local_path, repo_url)
+    print(data)
     with open('parsed_data.json', 'w') as f:
         json.dump(data, f)
     generate_called_function_ids()
     generated_function_ratings()
     remove_cloned_dir(local_path)
 
-if __name__ == "__main__":
-    repo_url = "https://github.com/allrod5/pycollect"  
-    local_path = "/Users/paurushkumar/Desktop/CodeFlow/empty" 
-    data = get_repo_data(repo_url, local_path)
+# if __name__ == "__main__":
+#     repo_url = "https://github.com/allrod5/pycollect"  
+#     local_path = "/Users/paurushkumar/Desktop/CodeFlow/empty" 
+#     data = get_repo_data(repo_url, local_path)
 
-    with open('parsed_data.json', 'w') as f:
-        json.dump(data, f)
+#     with open('parsed_data.json', 'w') as f:
+#         json.dump(data, f)
     
-    generate_called_function_ids()
-    generated_function_ratings()
+#     generate_called_function_ids()
+#     generated_function_ratings()
 
